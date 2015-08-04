@@ -109,13 +109,13 @@ namespace PSLADemo
                     Dimension dim = (Dimension)t;
                     if (t != (from j in queryTables where j is Dimension select j).Last())
                     {
-                        whereJoinString += String.Format(" {}.{}={}.{} AND ",
+                        whereJoinString += String.Format(" {0}.{1}={2}.{3} AND ",
                                                           dim.tableName, dim.tablePrimaryKey.attributeName,
                                                           factTableName, dim.dimensionForeignKey.attributeName);
                     }
                     else
                     {
-                        whereJoinString += String.Format(" {}.{}={}.{} ",
+                        whereJoinString += String.Format(" {0}.{1}={2}.{3} ",
                                                           dim.tableName, dim.tablePrimaryKey.attributeName,
                                                           factTableName, dim.dimensionForeignKey.attributeName);
                     }
@@ -133,13 +133,13 @@ namespace PSLADemo
                     String[] splitValue = querySelectionAttributeValue.Split(',');
                     for (int i = 0; i < splitSelection.Count(); i++)
                     {
-                        whereSelectionString = String.Format("{} <= {}", splitSelection[i], splitValue[i]);
+                        whereSelectionString = String.Format("{0} <= {1}", splitSelection[i], splitValue[i]);
                         if (i != splitSelection.Count() - 1) whereSelectionString += " AND ";
                     }
                 }
                 else
                 {
-                    whereSelectionString = String.Format("{} <= {}", 
+                    whereSelectionString = String.Format("{0} <= {1}", 
                                                             querySelectionAttribute.attributeName,
                                                             querySelectionAttributeValue);
                 }

@@ -1,0 +1,99 @@
+{
+  "Tiers": [
+    {
+      "Tier": 1,
+      "NumberWorkers": 4,
+      "Query Groupings": [
+        {
+          "SLA Threshold": 10.0,
+          "Queries": [
+            {
+              "Query": "SELECT (9 ATTR.) FROM (Customer ) WHERE 100%"
+            },
+            {
+              "Query": "SELECT (9 ATTR.) FROM (Part ) WHERE 100%"
+            },
+            {
+              "Query": "SELECT (17 ATTR.) FROM (Date ) WHERE 100%"
+            },
+            {
+              "Query": "SELECT (60 ATTR.) FROM (5 TABLES) WHERE 0.1%"
+            }
+          ]
+        },
+        {
+          "SLA Threshold": 60.0,
+          "Queries": [
+            {
+              "Query": "SELECT (17 ATTR.) FROM (Lineorder ) WHERE 100%"
+            },
+            {
+              "Query": "SELECT (9 ATTR.) FROM (2 TABLES) WHERE 100%"
+            },
+            {
+              "Query": "SELECT (3 ATTR.) FROM (5 TABLES) WHERE 100%"
+            },
+            {
+              "Query": "SELECT (60 ATTR.) FROM (5 TABLES) WHERE 10%"
+            }
+          ]
+        },
+        {
+          "SLA Threshold": 300.0,
+          "Queries": [
+            {
+              "Query": "SELECT (60 ATTR.) FROM (5 TABLES) WHERE 100%"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Tier": 2,
+      "NumberWorkers": 6,
+      "Query Groupings": [
+        {
+          "SLA Threshold": 10.0,
+          "Queries": [
+            {
+              "Query": "SELECT (27 ATTR.) FROM (5 TABLES) WHERE 10%"
+            },
+            {
+              "Query": "SELECT (60 ATTR.) FROM (5 TABLES) WHERE 1%"
+            }
+          ]
+        },
+        {
+          "SLA Threshold": 60.0,
+          "Queries": [
+            {
+              "Query": "SELECT (11 ATTR.) FROM (2 TABLES) WHERE 100%"
+            },
+            {
+              "Query": "SELECT (9 ATTR.) FROM (5 TABLES) WHERE 100%"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Tier": 3,
+      "NumberWorkers": 8,
+      "Query Groupings": []
+    },
+    {
+      "Tier": 4,
+      "NumberWorkers": 16,
+      "Query Groupings": [
+        {
+          "SLA Threshold": 10.0,
+          "Queries": [
+            {
+              "Query": "SELECT (1 ATTR.) FROM (4 TABLES) WHERE 100%"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

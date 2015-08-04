@@ -14,7 +14,7 @@ namespace PSLADemo
     class PSLAGenerator
     {
         //gathered config information
-        String configurationFolderPath = @"..\..\..\configFolder";
+        String configurationFolderPath = @"..\..\..\PSLAFiles";
         int numTiers;
         Boolean useRealRuntimes;
          
@@ -26,14 +26,14 @@ namespace PSLADemo
       
         //data information
         double[] selectivities = { .1, 1, 10, 100 };
-        List<Table> listOfTables = new List<Table>();
-        Fact factTable;
+        public static List<Table> listOfTables = new List<Table>();
+        public static Fact factTable;
 
         //query information
-        List<Query> listOfQueries = new List<Query>();
+        public static List<Query> listOfQueries = new List<Query>();
 
         //PSLA clusters generated
-        static List<Cluster> clusterList = new List<Cluster>();
+        public static List<Cluster> clusterList = new List<Cluster>();
         
         static void Main(string[] args)
         {
@@ -46,6 +46,9 @@ namespace PSLADemo
             Console.ReadLine();
         }
 
+        /*
+         * Reads user input before generating the PSLA
+         */
         public void readConfig()
         {
             String currentLine = String.Empty;
@@ -54,14 +57,14 @@ namespace PSLADemo
             while(lineCount < 2){
                 switch (lineCount) {
                     case 0:
-                        Console.Write("Number of Configurations: ");
-                        var numValue = Console.ReadLine();
-                        numTiers = Int32.Parse(numValue);
+                        //fixing for now until we add the EMD
+                        int numValue = 4;
+                        numTiers = numValue;
                         break;
                     case 1:
                         Console.Write("Use predicted (P) or real (R) runtimes: ");
                         var runtimeValue = Console.ReadLine();
-                        useRealRuntimes = String.Equals(runtimeValue, "P", StringComparison.OrdinalIgnoreCase) ? false : true;
+                        useRealRuntimes = String.Equals(runtimeValue, "p", StringComparison.OrdinalIgnoreCase) ? false : true;
                         break;
                 }
                 lineCount++;
@@ -77,78 +80,9 @@ namespace PSLADemo
          */
         public void dataQueryGeneration()
         {
-            //PARSE SCHEMA
-            StreamReader schemaReader = new StreamReader(Path.Combine(configurationFolderPath,schemaFile));
-            String currentLine = schemaReader.ReadLine();
-            bool firstLine = true;
-            while (currentLine != null) {
-                List<Attribute> listofPrimaryKeys = new List<Attribute>();
-                List<Attribute> listofAttributes = new List<Attribute>();
-                List<String> listofSelectivities = new List<String>();
+            //read the data schema
+            FileReaderUtils.readDataSchema(configurationFolderPath, schemaFile);
 
-                //read table info
-                String[] tableNameSize = currentLine.Substring(0).Split(',');
-                String tableName = tableNameSize[0];
-                int tableSize = int.Parse(tableNameSize[1]);
-                Attribute foreignKeyAttribute = null;
-
-                //loop through the table attributes
-                while ((currentLine = schemaReader.ReadLine()).Contains("*")) {
-                    bool isPrimaryKey = false;
-                    String[] attributeNameSize = currentLine.Substring(1).Split(',');
-                    String attributeName = attributeNameSize[0];
-                    int attributeSize;
-
-                    if (currentLine.Contains("#PK")) { //Primary Key
-                        attributeSize = int.Parse(attributeNameSize[1].Substring(0, attributeNameSize[1].IndexOf(';')));
-                        isPrimaryKey = true;
-                    }
-                    else {
-                        attributeSize = int.Parse(attributeNameSize[1]);
-                    }
-
-                    if (attributeNameSize[1].Contains("#FK")) { //Foreign Key
-                        String[] foreignKey = currentLine.Split(' ');
-                        foreignKeyAttribute = new Attribute(foreignKey[1], attributeSize);
-                    }
-
-                    //create the attribute and add it to the lists
-                    Attribute currentAttribute = new Attribute(attributeName, attributeSize);
-                    if (isPrimaryKey) listofPrimaryKeys.Add(currentAttribute);
-                    listofAttributes.Add(currentAttribute);
-                }
-
-                //read Selectivities
-                listofSelectivities = currentLine.Substring(0).Split(';').ToList();
-                listofSelectivities.Add(String.Empty); //adding the "nothing" for 100% 
-
-
-                if (firstLine) {
-                    //composite keys
-                    if (listofPrimaryKeys.Count > 1) {
-                        String compositeName = String.Empty;
-                        int compositeSize = 0;
-                        foreach (Attribute att in listofPrimaryKeys) {
-                            compositeName += att.attributeName;
-                            compositeSize += att.attributeSize;
-                            if (!(listofPrimaryKeys.Last() == att)) compositeName += ",";
-                        }
-                        factTable = new Fact(tableName, listofAttributes, listofSelectivities, new Attribute(compositeName, compositeSize), tableSize);
-                    }
-                    else {
-                        factTable = new Fact(tableName, listofAttributes, listofSelectivities, listofPrimaryKeys.First(), tableSize);
-                    }
-                    listOfTables.Add(factTable);
-                    firstLine = false;
-                }
-                else {
-                    listOfTables.Add(new Dimension(tableName, listofAttributes, listofSelectivities, listofPrimaryKeys.First(), tableSize, foreignKeyAttribute));
-                }
-                currentLine = schemaReader.ReadLine();
-            }
-            schemaReader.Close();
-
-            //GENERATE QUERIES
             int queryID = 1;
             List<double> allList = new List<double>();
 
@@ -162,8 +96,9 @@ namespace PSLADemo
                                                             select a).Take(i).ToList();
                     foreach (var currentCoverage in selectionattributesForTables) { //possible selectivities
                         foreach (var currentTier in tiers) {
-                            listOfQueries.Add(new SingleTableQuery(queryID, projectingAttributes, new List<Table> { currentSingleTable }, currentSingleTable.tablePrimaryKey,
-                                                                   currentCoverage, selectivities[counter], currentSingleTable, currentTier));
+                            listOfQueries.Add(new SingleTableQuery(queryID, projectingAttributes, new List<Table> { currentSingleTable }, 
+                                                                   currentSingleTable.tablePrimaryKey, currentCoverage, selectivities[counter],
+                                                                   currentSingleTable, currentTier));
                         }
                         queryID++;
                         counter++;
@@ -171,7 +106,7 @@ namespace PSLADemo
                 }
             }
 
-            //join queries
+            //generate join queries
             List<Table> totalDimensions = (from a in listOfTables
                                             where a is Dimension
                                             orderby a.tableSize descending
@@ -209,14 +144,23 @@ namespace PSLADemo
 
                     foreach (var currentCoverage in selectionattributesForTables) {
                         foreach (var currentTiers in tiers) {
-                            listOfQueries.Add(new JoinQuery(queryID, projectingAttributes, new Attribute(factTable.tablePrimaryKey.attributeName, factTable.tablePrimaryKey.attributeSize, factTable),
-                                               currentCoverage, selectivities[counter], tablesToJoin, factTable, currentTiers));
+                            listOfQueries.Add(new JoinQuery(queryID, projectingAttributes, new Attribute(factTable.tablePrimaryKey.attributeName, 
+                                                            factTable.tablePrimaryKey.attributeSize, factTable),
+                                                            currentCoverage, selectivities[counter], tablesToJoin, factTable, currentTiers));
                         }
                         queryID++;
                         counter++;
                     }
                 }
-            } 
+            }
+
+            //output queries
+            StreamWriter queryOutput = new StreamWriter(Path.Combine(configurationFolderPath, "SQLQueries-Generated.txt"));
+            foreach (var currentQuery in listOfQueries.Where(l => l.queryTier == 1)) {
+                queryOutput.WriteLine(currentQuery.ToString());
+            }
+            queryOutput.Close();
+
         }
 
         public void useRealTimes()
@@ -252,17 +196,19 @@ namespace PSLADemo
                 Console.WriteLine("Predicting runtimes...");
                 foreach (var t in tiers) {
                     String predictionPath = @"predictions\" + tierPredictionFolders[t - 1];
-                    predictForConfig(Path.Combine(configurationFolderPath, predictionPath), t);
+                    predictForTier(Path.Combine(configurationFolderPath, predictionPath), t);
                 }
             }
         }
 
-        public void predictForConfig(String configPredictionPath, int tier)
+        public void predictForTier(String configPredictionPath, int tier)
         {
             //predict runtimes using training and testing
             ProcessStartInfo info = new ProcessStartInfo("cmd.exe");
             info.WindowStyle = ProcessWindowStyle.Hidden;
-            var predictCommand = String.Format("/C java -classpath \"{0}\"" + " weka.classifiers.rules.M5Rules -M 4.0 -t \"{1}\" -T {2} -p 0 > \"{3}\"", "C:\\Program Files\\Weka-3-6\\weka.jar",
+
+            var predictCommand = String.Format("/C java -classpath \"{0}\"" + " weka.classifiers.rules.M5Rules -M 4.0 -t \"{1}\" -T {2} -p 0 > \"{3}\"",
+                                                configurationFolderPath + @"\predictions\weka.jar",
                                                 configPredictionPath + "\\TRAINING.arff",
                                                 configPredictionPath + "\\TESTING.arff",
                                                 configPredictionPath + "\\results.txt");
@@ -270,47 +216,8 @@ namespace PSLADemo
             info.Arguments = predictCommand;
             Process.Start(info).WaitForExit();
 
-            List<Query> listToModifyPredictions = listOfQueries.Where(x => x.queryTier == tier).ToList();
-
-            foreach (var currentQuery in listToModifyPredictions) {
-                currentQuery.queryPredictedTime = 0;
-            }
-
-            //parse the results
-            StreamReader sr = new StreamReader(configPredictionPath + "\\results.txt");
-            string currentline = String.Empty;
-
-            //read header
-            for (int i = 0; i < 5; i++) {
-                currentline = sr.ReadLine();
-            }
-
-            //read the file and store the predictions for this configuration
-            List<double> storePredictedTimes = new List<double>();
-            while ((currentline = sr.ReadLine()) != null) {
-                string[] parts = currentline.Split(null);
-                List<double> temp = new List<double>();
-                foreach (var p in parts) {
-                    if (p != String.Empty) {
-                        temp.Add(double.Parse(p));
-                    }
-                }
-                if (temp.Count >= 4) {
-                    double predValue = temp[2];
-                    storePredictedTimes.Add(predValue);
-                }
-            }
-            sr.Close();
-
-            foreach (var currentQuery in listToModifyPredictions) {
-                int id = currentQuery.queryID;
-                if (storePredictedTimes[id - 1] < 0) {
-                    currentQuery.queryPredictedTime = 0;
-                }
-                else {
-                    currentQuery.queryPredictedTime = storePredictedTimes[id - 1];
-                }
-            }
+            //parse prediction results
+            FileReaderUtils.parsePredictionResults(configPredictionPath, tier);
         }
 
         /*
@@ -357,17 +264,18 @@ namespace PSLADemo
             var maxValue = clusterList.Where(l => l.clusterTier == tier).Select(l => l.clusterMax).Max();
             int[] humanIntervals = new int[] { 0, 10, 60, 300, 600, 1800, 3600, 7200 };
 
-            int insideToAdd = 1;
+            int intervalMarker = 1;
             int counter = 0;
 
-            var highInterval = humanIntervals[insideToAdd];
-            int i = humanIntervals[insideToAdd - 1];
+            var highInterval = humanIntervals[intervalMarker];
+            int i = humanIntervals[intervalMarker - 1];
 
             bool done = false;
 
             while (!done) {
                 var currentInterval = (from l in clusterList
-                                       where l.clusterTier == tier && l.clusterMax >= i && l.clusterMax < highInterval
+                                       where l.clusterTier == tier && l.clusterMax >= i 
+                                             && l.clusterMax < highInterval
                                        select l).ToList();
 
                 if (currentInterval.Count() > 0) {
@@ -392,9 +300,9 @@ namespace PSLADemo
                     done = true;
                 }
                 else {
-                    insideToAdd++;
-                    i = humanIntervals[insideToAdd - 1];
-                    highInterval = humanIntervals[insideToAdd];
+                    intervalMarker++;
+                    i = humanIntervals[intervalMarker - 1];
+                    highInterval = humanIntervals[intervalMarker];
                 }
             }
         }
@@ -475,16 +383,16 @@ namespace PSLADemo
                                     from t in tiers
                                     select new JObject(
                                             new JProperty("Tier", t),
-                                            new JProperty("NumWorkers", tiersWorkers[t-1]),
-                                            new JProperty("Clusters",
+                                            new JProperty("NumberWorkers", tiersWorkers[t-1]),
+                                            new JProperty("Query Groupings",
                                                 from clusters in clusterList
                                                 where clusters.clusterTier == t
                                                 select new JObject(
-                                                        new JProperty("Threshold", clusters.clusterIntervalHigh),
+                                                        new JProperty("SLA Threshold", clusters.clusterIntervalHigh),
                                                         new JProperty("Queries",
                                                                 from q in clusters.getRootQueries()
                                                                 select new JObject(
-                                                                        new JProperty("QueryTemplate", q.toStringShortHand()))))))));
+                                                                        new JProperty("Query", q.toStringShortHand()))))))));
 
             allFile.WriteLine(job.ToString());
             allFile.Close();
