@@ -15,6 +15,14 @@ namespace PSLADemo
             StreamReader schemaReader = new StreamReader(Path.Combine(configPath, schemaFileName));
             String currentLine = schemaReader.ReadLine();
             bool firstLine = true;
+
+            //read through the header
+            while (currentLine != "*/") {
+                currentLine = schemaReader.ReadLine();
+            }
+            currentLine = schemaReader.ReadLine();
+
+            //start reading schema
             while (currentLine != null) {
                 List<Attribute> listofPrimaryKeys = new List<Attribute>();
                 List<Attribute> listofAttributes = new List<Attribute>();

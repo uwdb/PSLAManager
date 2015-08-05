@@ -1,3 +1,22 @@
+/* Schema Definition for the TPC-H SSB Dataset
+* PSLAManager reads a star schema based on the following template. Portions in brackets are optional:
+*
+*	TABLE_NAME, TABLE_SIZE_KILOBYTES
+*	* TABLE_ATTRIBUTE, TABLE_ATTRIBUTE_BYTE_SIZE [;#PK] [;#FK]
+*	  (... list all attributes)
+*	* SELECTIVITY_.1, SELECTIVITY_1, SELECTIVITY_10
+*
+* In other words, you first need to describe the table, its size in bytes, its attributes along with
+* their size and whether or not they are # a key (where #PK signifies a primary key, and #FK a
+* foreign key). If modifying this template, make sure the Fact table is listed first.
+*
+* Finally, you will need to describe predicates values which guarantee a selectivity factor of .1%,
+* 1% and 10% for the table based on the table's primary keys. For example, in the Customer table below,
+* we have values 30, 3000, and 30000. PSLAManager will use this to create queries with different selectivities.
+* For example based on our information, PSLAManager will assume that the following query covers 1% of the
+* customer relation:
+* "select * from customer where c_custkey <= 30".
+*/
 Lineorder,7271040
 *L_CUSTKEY,4
 *L_SUPPKEY,4
