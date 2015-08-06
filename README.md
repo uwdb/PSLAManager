@@ -47,7 +47,7 @@ If you are providing a new schema, the statistics for the testing data must be u
     
     * **Supplementary Files** You will first need PSLAManager to generate the queries (from your custom dataset) which you will be collecting statistics from. To do this, Run ```PSLAManager.exe``` and select the "Generate queries" option. This will create a file under ```PSLAManager\PSLAFiles``` called ```SQLQueries-Generated.txt```.
     *  **Examples of Testing**  Similarly to the  training data, you should see examples of testing statistics under ```PSLAManager\PSLAFiles\predictions_for_tiers\prediction_for_tiers``` under a tier folder with a file called ```TESTING.arff```.
-     * **Optional (assuming perfect predictions)**:  If you would like to provide real runtimes for these different tiers and skip predictions altogether, for each  tier simply provide a ```realtimes.txt``` file with real runtimes for each query generated.
+    * **Optional (assuming perfect predictions)**:  If you would like to provide real runtimes for these different tiers and skip predictions altogether, for each  tier simply provide a ```realtimes.txt``` file with real runtimes for each query generated.
 * **Step 5: Run PSLAManager** Before running PSLAManager to generate a PSLA, please ensure you have the following components ready:
     * A custom dataset defined under ```PSLAManager\PSLAFiles\SchemaDefinition.txt```
     * Modified tiers under ```PSLAManager\PSLAFiles\predictions_for_tiers\tiers.txt```

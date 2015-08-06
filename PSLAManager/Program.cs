@@ -22,7 +22,6 @@ namespace PSLAManager
         String schemaFile = "SchemaDefinition.txt";
         String tierFile = @"predictions_for_tiers\tiers.txt";
         public static List<String> tierPredictionFolders = new List<String>();
-        int[] tiersWorkers = { 4, 6, 8, 16 };
         public static List<int> tiers = new List<int>();
       
         //data information
@@ -438,7 +437,7 @@ namespace PSLAManager
                                     from t in tiers
                                     select new JObject(
                                             new JProperty("Tier", t),
-                                            new JProperty("NumberWorkers", tiersWorkers[t-1]),
+                                            new JProperty("Tier Description", tierPredictionFolders[t - 1]),
                                             new JProperty("Query Groupings",
                                                 from clusters in clusterList
                                                 where clusters.clusterTier == t
