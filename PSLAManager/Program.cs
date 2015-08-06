@@ -9,20 +9,21 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 
-namespace PSLADemo
+namespace PSLAManager
 {
     class PSLAGenerator
     {
         //gathered config information
         String configurationFolderPath = @"..\..\..\PSLAFiles";
-        int numTiers;
+        static Boolean generateQueriesOnly;
         Boolean useRealRuntimes;
-         
+
         //fixed parameters
-        String schemaFile = "SchemaDefinitionTPCH.txt";
-        List<String> tierPredictionFolders = new List<String> { "4Workers", "6Workers", "8Workers", "16Workers"};
+        String schemaFile = "SchemaDefinition.txt";
+        String tierFile = @"predictions_for_tiers\tiers.txt";
+        public static List<String> tierPredictionFolders = new List<String>();
         int[] tiersWorkers = { 4, 6, 8, 16 };
-        List<int> tiers = new List<int>();
+        public static List<int> tiers = new List<int>();
       
         //data information
         double[] selectivities = { .1, 1, 10, 100 };
@@ -40,9 +41,17 @@ namespace PSLADemo
             PSLAGenerator p = new PSLAGenerator();
             p.readConfig();
             p.dataQueryGeneration();
-            p.buildPredictionModel();
-            p.generatePSLA();
-            p.outputPSLAResult();
+
+            if (!generateQueriesOnly) {
+                p.buildPredictionModel();
+                p.generatePSLA();
+                p.outputPSLAResult();
+            }
+            else {
+                Console.WriteLine(String.Empty);
+                Console.WriteLine("Finished Generating Queries");
+            }
+
             Console.ReadLine();
         }
 
@@ -52,26 +61,67 @@ namespace PSLADemo
         public void readConfig()
         {
             String currentLine = String.Empty;
-            int lineCount = 0;
-         
-            while(lineCount < 2){
-                switch (lineCount) {
-                    case 0:
-                        //fixing for now until we add the EMD
-                        int numValue = 4;
-                        numTiers = numValue;
-                        break;
-                    case 1:
-                        Console.Write("Use predicted (P) or real (R) runtimes: ");
-                        var runtimeValue = Console.ReadLine();
-                        useRealRuntimes = String.Equals(runtimeValue, "p", StringComparison.OrdinalIgnoreCase) ? false : true;
-                        break;
+
+            Console.WriteLine("*******************************");
+            Console.WriteLine("PSLAManager");
+            Console.WriteLine("*******************************");
+
+            Console.WriteLine(String.Empty);
+            Console.WriteLine(String.Empty);
+
+            Console.WriteLine("Please select an option (either type 1 or 2 and then press <ENTER>)");
+            Console.WriteLine(String.Empty);
+
+            Console.WriteLine("Option 1: Generate a PSLA");
+            Console.WriteLine("Option 2: Generate New Queries (for a custom schema)");
+
+            Boolean selectedOption = false;
+            int answer = 0;
+            while (!selectedOption) {
+                try {
+                        answer = Int32.Parse(Console.ReadLine().Trim());
+                        if (answer == 1 || answer == 2) {
+                            selectedOption = true;
+                            if (answer == 2) generateQueriesOnly = true;
+                        }
+                        else {
+                            throw new Exception();
+                        }  
+                    }
+                catch(Exception){
+                    Console.WriteLine("Invalid answer. Please try again (1 or 2)");
                 }
-                lineCount++;
             }
 
-            for (int i = 1; i <= numTiers; i++) {
-                tiers.Add(i);
+            //creating a PSLA option
+            if (answer == 1) {
+                Boolean selectedRuntimesOption = false;
+                String runtimeValue = String.Empty;
+                while (!selectedRuntimesOption) {
+                    try {
+                        Console.WriteLine(String.Empty);
+                        Console.WriteLine("Please select which runtimes to use for the PSLA: ");
+                        Console.WriteLine(String.Empty);
+                        Console.WriteLine("* (Press P) -- predicted runtimes  ");
+                        Console.WriteLine("* (Press R) -- real runtimes <this is assuming perfect predictions> ");
+
+                        //reading input
+                        runtimeValue = Console.ReadLine().Trim();
+                        Console.WriteLine(String.Empty);
+
+                        if (String.Equals(runtimeValue, "P", StringComparison.OrdinalIgnoreCase) 
+                            || String.Equals(runtimeValue, "R", StringComparison.OrdinalIgnoreCase)) {
+                            selectedRuntimesOption = true;
+                        }
+                        else {
+                            throw new Exception();
+                        }
+                    }
+                    catch (Exception) {
+                        Console.WriteLine("Invalid answer. Please try again (P or R)");
+                    }
+                }
+                useRealRuntimes = String.Equals(runtimeValue, "p", StringComparison.OrdinalIgnoreCase) ? false : true;
             }
         }
 
@@ -80,7 +130,12 @@ namespace PSLADemo
          */
         public void dataQueryGeneration()
         {
+            //finding number of tiers
+            FileReaderUtils.readTiers(configurationFolderPath, tierFile);
+            Console.WriteLine("Number of Tiers found: " + tiers.Count());
+
             //read the data schema
+            Console.WriteLine("Reading the Data Schema from " + schemaFile + "...");
             FileReaderUtils.readDataSchema(configurationFolderPath, schemaFile);
 
             int queryID = 1;
@@ -166,7 +221,7 @@ namespace PSLADemo
         public void useRealTimes()
         {
             foreach (var t in tiers) {
-                String realRuntimesPath = @"predictions\" + tierPredictionFolders[t - 1];
+                String realRuntimesPath = @"predictions_for_tiers\" + tierPredictionFolders[t - 1];
                 StreamReader r = new StreamReader(Path.Combine(configurationFolderPath, realRuntimesPath + @"\realtimes.txt"));
 
                 string currentLine = string.Empty;
@@ -195,7 +250,7 @@ namespace PSLADemo
             else {
                 Console.WriteLine("Predicting runtimes...");
                 foreach (var t in tiers) {
-                    String predictionPath = @"predictions\" + tierPredictionFolders[t - 1];
+                    String predictionPath = @"predictions_for_tiers\" + tierPredictionFolders[t - 1];
                     predictForTier(Path.Combine(configurationFolderPath, predictionPath), t);
                 }
             }
@@ -208,7 +263,7 @@ namespace PSLADemo
             info.WindowStyle = ProcessWindowStyle.Hidden;
 
             var predictCommand = String.Format("/C java -classpath \"{0}\"" + " weka.classifiers.rules.M5Rules -M 4.0 -t \"{1}\" -T {2} -p 0 > \"{3}\"",
-                                                configurationFolderPath + @"\predictions\weka.jar",
+                                                configurationFolderPath + @"\predictions_for_tiers\weka.jar",
                                                 configPredictionPath + "\\TRAINING.arff",
                                                 configPredictionPath + "\\TESTING.arff",
                                                 configPredictionPath + "\\results.txt");

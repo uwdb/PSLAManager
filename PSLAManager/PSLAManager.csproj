@@ -7,8 +7,8 @@
     <ProjectGuid>{CBB1F267-2218-492A-A81D-F926249350E1}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>PSLADemoCode</RootNamespace>
-    <AssemblyName>PSLADemoCode</AssemblyName>
+    <RootNamespace>PSLAManager</RootNamespace>
+    <AssemblyName>PSLAManager</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>

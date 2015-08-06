@@ -1,0 +1,9 @@
+# Here is a list of configurations (tiers) that PSLAManager will use to generate a PSLA. If you are using your own 
+# tiers, list them below. Each tierslisted should also have a directory created along with testing/training data. 
+# List the tiers from cheapest (smallest) to more expensive.
+#
+
+4_Workers
+6_Workers
+8_Workers
+16_Workers

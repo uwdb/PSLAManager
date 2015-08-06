@@ -5,10 +5,27 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PSLADemo
+namespace PSLAManager
 {
     public class FileReaderUtils
     {
+
+        public static void readTiers(String configPath, String tierFileName)
+        {
+            StreamReader tierReader = new StreamReader(Path.Combine(configPath, tierFileName));
+            String currentLine = tierReader.ReadLine();
+            while (currentLine != null) {
+                if(currentLine != String.Empty && !currentLine.Contains("#")) {
+                    PSLAGenerator.tierPredictionFolders.Add(currentLine);
+                }
+                currentLine = tierReader.ReadLine();
+            }
+
+            for (int i = 1; i <= PSLAGenerator.tierPredictionFolders.Count(); i++) {
+                PSLAGenerator.tiers.Add(i);
+            }
+        }
+
         public static void readDataSchema(String configPath, String schemaFileName)
         {
             //PARSE SCHEMA

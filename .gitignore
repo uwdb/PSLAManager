@@ -5,7 +5,7 @@
 
 PSLAFiles/FinalPSLA.json
 PSLAFiles/SQLQueries-Generated.txt
-PSLAFiles/predictions/*Workers/results.txt
+PSLAFiles/predictions_for_tiers/*Workers/results.txt
 
 # User-specific files
 *.suo
