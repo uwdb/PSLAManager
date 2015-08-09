@@ -1,6 +1,6 @@
 # PSLAManager 
 
-This is a prototype of the PSLAManager system, based on the paper [Changing the Face of Database Cloud Services with Personalized Service Level Agreements](http://myria.cs.washington.edu/publications/Ortiz_PSLA_CIDR_2015.pdf).  The key idea of the PSLA is for a user to specify the schema of her data and basic statistics (e.g., base table cardinalities) and for the cloud service to show what types of queries the user can run and the performance of these queries with different configurations (which we define as "tiers") of the service, each with a defined cost. 
+This is a prototype of the PSLAManager system, based on the paper [Changing the Face of Database Cloud Services with Personalized Service Level Agreements](http://myria.cs.washington.edu/publications/Ortiz_PSLA_CIDR_2015.pdf). The PSLAManager generates service level agreements for cloud data services. Instead of asking users to pick a desired number of instances of a cloud service, the PSLAManager shows to users what is possible with their data. The key idea of the PSLA is for a user to specify the schema of her data and basic statistics (e.g., base table cardinalities) and for the PSLAManager to show what types of queries the user can run and the performance of these queries with different configurations (which we call "tiers") of the service, each with a defined cost. The PSLAManager is designed for read-only workloads and data analysis services.
 
 ## Setup
 1. Clone the repository
@@ -11,11 +11,16 @@ This is a prototype of the PSLAManager system, based on the paper [Changing the 
 When generating a PSLA, the program takes as input the following components:
 
 * **Dataset Schema**: description of the user's dataset that PSLAManager will use to generate a PSLA
-* **Training Data**: Statistics on a separate synthetic dataset to learn the performance of each tier 
-* **Testing Data**: Statistics about the user's dataset which will help predict runtimes
 
-PSLAManager first uses the **Dataset Schema** to automatically generate queries for the dataset. The runtimes for these queries are then predicted for different configurations of 
-the service by using the **Training Data** and the **Testing Data**. As a final step, PSLAManager uses algorithms to compress the generated queries before showing the final PSLA. 
+* **Training Data**: This data contains statistics on queries for an independent synthetic dataset. This serves as a model of query runtimes for each tier.
+
+* **Testing Data**: Given the dataset schema input, PSLAManager will generate a set of queries. Each query is then represented by a feature vector of statistics in order to predict the runtime. The last feature of the feature vector is the real query runtime. This feature is optional. When present, the PSLAManager can use either real or predicted runtimes when generating a PSLA. Real runtimes serve to test the PSLA generation capabilities in the case of perfect query time prediction.
+
+In order for users to understand the performance of queries at different configruations, PSLAManager first uses the **Dataset Schema** to automatically generate queries for the dataset. PSLAManager primarily focuses on generating "join queries" at different selectivities. 
+
+For each query generated, the user needs to generate a feature vector containing information about the query. These features are left for the user to decide. Some features could include those from the database query optimizer (such as query plan features, estimated number of rows, estimated costs, etc).
+
+The runtimes for these queries are then predicted by using these features for different configurations of  the service through the **Training Data** and the **Testing Data**. As a final step, PSLAManager uses algorithms to compress the generated set of queries before showing the final PSLA. 
 
 #### Option #1 : Generate a PSLA for the Myria Service and TPC-H Example Dataset
 With this option, the system uses its default training data, test data, and schema. The default schema is for the [TPC-H Star Schema dataset](http://www.cs.umb.edu/~poneil/StarSchemaB.PDF). The training data corresponds to a synthetic dataset executed on different sized Myria clusters of 4, 6, 8 and 16 workers. [Myria](http://myria.cs.washington.edu/) is our parallel data management service.
@@ -71,3 +76,4 @@ When defining a new schema, the statistics for the testing data must be updated 
     * Modified training/testing data for each tier defined under ```PSLAManager\PSLAFiles\predictions_for_tiers```
 
 Once ready, run the ```PSLAManager.exe``` and select the "Generate a PSLA" option. The resulting PSLA will appear as ```PSLAManager\PSLAFiles\FinalPSLA.json```.
+
