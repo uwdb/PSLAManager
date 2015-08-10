@@ -59,7 +59,6 @@ namespace PSLAManager
          */
         public void readConfig()
         {
-            String currentLine = String.Empty;
 
             Console.WriteLine("*******************************");
             Console.WriteLine("PSLAManager");
@@ -138,7 +137,6 @@ namespace PSLAManager
             FileReaderUtils.readDataSchema(configurationFolderPath, schemaFile);
 
             int queryID = 1;
-            List<double> allList = new List<double>();
 
             //first generate single table queries
             foreach (var currentSingleTable in listOfTables) {
@@ -177,7 +175,6 @@ namespace PSLAManager
                 }
 
                 //attributes from the dimension tables
-                var test = tablesToJoin.Where(x => !(x is Fact));
                 foreach (var currentTable in tablesToJoin.Where(x => !(x is Fact))) {
                     foreach (var currentAttr in currentTable.tableAttributeList) {
                         if (!completeAttributeList.Contains(currentAttr))
@@ -294,7 +291,6 @@ namespace PSLAManager
 
         public void createSingletons()
         {
-            List<Query> currentInterval = new List<Query>();
             int counter = 0;
 
             foreach (var currentTier in tiers) {
@@ -350,7 +346,6 @@ namespace PSLAManager
 
                 //check if finished
                 if (highInterval > maxValue) {
-                    var lit = clusterList.Where(l => l.clusterTier == tier && l.clusterSingleton == true);
                     done = true;
                 }
                 else {
