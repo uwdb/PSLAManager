@@ -255,8 +255,10 @@ namespace PSLAManager
         public void predictForTier(String configPredictionPath, int tier)
         {
             //predict runtimes using training and testing
-            ProcessStartInfo info = new ProcessStartInfo("java.exe");
+            ProcessStartInfo info = new ProcessStartInfo("java");
             info.WindowStyle = ProcessWindowStyle.Hidden;
+            info.UseShellExecute = false;
+            info.RedirectStandardOutput = true;
 
             var predictCommand = String.Format("-classpath \"{0}\" weka.classifiers.rules.M5Rules -M 4.0 -t \"{1}\" -T {2} -p 0 -classifications \"weka.classifiers.evaluation.output.prediction.PlainText  -suppress -file {3}\"",
                                                 Path.GetFullPath(configurationFolderPath + @"/predictions_for_tiers/weka.jar"),
