@@ -3,9 +3,22 @@
 This is a prototype of the PSLAManager system, based on the paper [Changing the Face of Database Cloud Services with Personalized Service Level Agreements](http://myria.cs.washington.edu/publications/Ortiz_PSLA_CIDR_2015.pdf). The PSLAManager generates service level agreements for cloud data services. Instead of asking users to pick a desired number of instances of a cloud service, the PSLAManager shows to users what is possible with their data. The key idea of the PSLA is for a user to specify the schema of her data and basic statistics (e.g., base table cardinalities) and for the PSLAManager to show what types of queries the user can run and the performance of these queries with different configurations (which we call "tiers") of the service, each with a defined cost. The PSLAManager is designed for read-only workloads and data analysis services.
 
 ## Setup
+*Make sure to have Java installed in your machine before running PSLAManager*
+
+**Running on Windows with Visual Studio**
 1. Clone the repository
 
-2. Open the solution ```PSLADemoCode.sln``` in Visual Studio and build the project. This will generate the ```PSLADemoCode.exe``` in the solution path.
+2. Open the solution ```PSLADemoCode.sln``` in Visual Studio and build the project. This will generate the ```PSLADemoCode.exe``` in the solution path (e.g. ```PSLAManager/bin/Release```)
+
+** Running on OS X with Mono**
+1. Clone the repository
+
+2. Install [Mono](http://www.mono-project.com/)
+
+3. To build the project, go to the ```PSLAManager``` folder and run the command ```xbuild /p:BuildWithMono="true" /p:Configuration=Release PSLAManager.sln```
+
+4. Navigate to the release folder ```PSLAManager/bin/Release```. Here, you will find the generated executable ```PSLADemoCode.exe```
+
 
 ##  Running PSLAManager
 When generating a PSLA, the program takes as input the following components:
@@ -29,7 +42,7 @@ Under the ```PSLAManager\PSLAFiles``` directory you are provided with all the ne
   * **Dataset Schema**: the file ```SchemaDefinition.txt``` provides information about the TPC-H SSB schema. 
   * **Training/Testing Data**: Under the folder ```predictions_for_tiers```, we provide testing data for the different tiers of the Myria service based on the TPC-H SSB dataset. We also provide training data for each of these tiers on a separate synthetic dataset.
 
-When running PSLAManager, first click on the executable (```PSLAManager.exe```) generated in the solution path.
+When running PSLAManager, first click on the executable (```PSLAManager.exe```) generated in the solution path. If you're running this using mono, you can run with the command ```mono PSLAManager.exe```.
 
 Once the program is running, first select the "Generate a PSLA" option. Second, you will need to select between using "predicted runtimes" or "real runtimes (assuming perfect predictions)". The resulting PSLA will appear under ```PSLAManager\PSLAFiles\FinalPSLA.json```.
 
@@ -48,7 +61,7 @@ When defining a new schema, the statistics for the testing data must be updated 
     * A custom dataset defined under ```PSLAManager\PSLAFiles\SchemaDefinition.txt```
     * Modified testing data for each tier defined under ```PSLAManager\PSLAFiles\predictions_for_tiers```
 
- Once ready, run the ```PSLAManager.exe``` and select the "Generate a PSLA" option. The resulting PSLA will appear as ```PSLAManager\PSLAFiles\FinalPSLA.json```.
+ Once ready, run the ```PSLAManager.exe``` (or if using mono,```mono PSLAManager.exe```). and select the "Generate a PSLA" option. The resulting PSLA will appear as ```PSLAManager\PSLAFiles\FinalPSLA.json```.
 
 #### Option #3 : Customize the Schema, Tiers, and Testing/Training Datasets to Generate a PSLA for a different Cloud Service
 In this option, you can customize the dataset, number of tiers, and testing/training data for an entirely different cloud service.
@@ -75,6 +88,7 @@ When defining a new schema, the statistics for the testing data must be updated 
     * Modified tiers under ```PSLAManager\PSLAFiles\predictions_for_tiers\tiers.txt```
     * Modified training/testing data for each tier defined under ```PSLAManager\PSLAFiles\predictions_for_tiers```
 
-Once ready, run the ```PSLAManager.exe``` and select the "Generate a PSLA" option. The resulting PSLA will appear as ```PSLAManager\PSLAFiles\FinalPSLA.json```
+Once ready, run the ```PSLAManager.exe```(or if using mono,```mono PSLAManager.exe```) and select the "Generate a PSLA" option. The resulting PSLA will appear as ```PSLAManager\PSLAFiles\FinalPSLA.json```
 
 For any questions, please email jortiz16@cs.washington.edu.
+
