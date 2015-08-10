@@ -14,13 +14,13 @@ namespace PSLAManager
     class PSLAGenerator
     {
         //gathered config information
-        String configurationFolderPath = @"..\..\..\PSLAFiles";
+        String configurationFolderPath = @"../../../PSLAFiles";
         static Boolean generateQueriesOnly;
         Boolean useRealRuntimes;
 
         //fixed parameters
         String schemaFile = "SchemaDefinition.txt";
-        String tierFile = @"predictions_for_tiers\tiers.txt";
+        String tierFile = @"predictions_for_tiers/tiers.txt";
         public static List<String> tierPredictionFolders = new List<String>();
         public static List<int> tiers = new List<int>();
       
@@ -220,8 +220,8 @@ namespace PSLAManager
         public void useRealTimes()
         {
             foreach (var t in tiers) {
-                String realRuntimesPath = @"predictions_for_tiers\" + tierPredictionFolders[t - 1];
-                StreamReader r = new StreamReader(Path.Combine(configurationFolderPath, realRuntimesPath + @"\realtimes.txt"));
+                String realRuntimesPath = @"predictions_for_tiers/" + tierPredictionFolders[t - 1];
+                StreamReader r = new StreamReader(Path.Combine(configurationFolderPath, realRuntimesPath + @"/realtimes.txt"));
 
                 string currentLine = string.Empty;
                 List<double> listoftimes = new List<double>();
@@ -249,7 +249,7 @@ namespace PSLAManager
             else {
                 Console.WriteLine("Predicting runtimes...");
                 foreach (var t in tiers) {
-                    String predictionPath = @"predictions_for_tiers\" + tierPredictionFolders[t - 1];
+                    String predictionPath = @"predictions_for_tiers/" + tierPredictionFolders[t - 1];
                     predictForTier(Path.Combine(configurationFolderPath, predictionPath), t);
                 }
             }
@@ -262,10 +262,10 @@ namespace PSLAManager
             info.WindowStyle = ProcessWindowStyle.Hidden;
 
             var predictCommand = String.Format("/C java -classpath \"{0}\"" + " weka.classifiers.rules.M5Rules -M 4.0 -t \"{1}\" -T {2} -p 0 > \"{3}\"",
-                                                configurationFolderPath + @"\predictions_for_tiers\weka.jar",
-                                                configPredictionPath + "\\TRAINING.arff",
-                                                configPredictionPath + "\\TESTING.arff",
-                                                configPredictionPath + "\\results.txt");
+                                                configurationFolderPath + @"/predictions_for_tiers/weka.jar",
+                                                configPredictionPath + "//TRAINING.arff",
+                                                configPredictionPath + "//TESTING.arff",
+                                                configPredictionPath + "//results.txt");
 
             info.Arguments = predictCommand;
             Process.Start(info).WaitForExit();
