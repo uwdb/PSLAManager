@@ -117,11 +117,11 @@ namespace PSLAManager
             }
 
             //parse the results
-            StreamReader sr = new StreamReader(configPath + "\\results.txt");
+            StreamReader sr = new StreamReader(configPath + "/results.txt");
             string currentline = String.Empty;
 
             //read header
-            for (int i = 0; i < 5; i++) {
+            for (int i = 0; i < 1; i++) {
                 currentline = sr.ReadLine();
             }
 
