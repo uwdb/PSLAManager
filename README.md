@@ -6,11 +6,13 @@ This is a prototype of the PSLAManager system, based on the paper [Changing the 
 *Make sure to have Java installed in your machine before running PSLAManager*
 
 **Running on Windows with Visual Studio**
+
 1. Clone the repository
 
 2. Open the solution ```PSLADemoCode.sln``` in Visual Studio and build the project. This will generate the ```PSLADemoCode.exe``` in the solution path (e.g. ```PSLAManager/bin/Release```)
 
-** Running on OS X with Mono**
+**Running on OS X with Mono**
+
 1. Clone the repository
 
 2. Install [Mono](http://www.mono-project.com/)
