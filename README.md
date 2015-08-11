@@ -9,7 +9,7 @@ This is a prototype of the PSLAManager system, based on the paper [Changing the 
 
 1. Clone the repository
 
-2. Open the solution ```PSLADemoCode.sln``` in Visual Studio and build the project. This will generate the ```PSLADemoCode.exe``` in the solution path (e.g. ```PSLAManager/bin/Release```)
+2. Open the solution ```PSLAManager.sln``` in Visual Studio and build the project. This will generate the ```PSLAManager.exe``` in the solution path (e.g. ```PSLAManager/bin/Release```). See instructions on how to run ```PSLAManager.exe``` under the section **Running PSLAManager**.
 
 **Running on OS X with Mono**
 
@@ -19,7 +19,7 @@ This is a prototype of the PSLAManager system, based on the paper [Changing the 
 
 3. To build the project, go to the ```PSLAManager``` folder and run the command ```xbuild /p:BuildWithMono="true" /p:Configuration=Release PSLAManager.sln```
 
-4. Navigate to the release folder ```PSLAManager/bin/Release```. Here, you will find the generated executable ```PSLADemoCode.exe```
+4. Navigate to the release folder ```PSLAManager/bin/Release```. Here, you will find the generated executable ```PSLAManager.exe```. See instructions on how to run ```PSLAManager.exe``` under the section **Running PSLAManager**.
 
 
 ##  Running PSLAManager
