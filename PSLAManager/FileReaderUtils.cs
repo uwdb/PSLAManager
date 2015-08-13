@@ -34,10 +34,12 @@ namespace PSLAManager
             bool firstLine = true;
 
             //read through the header
-            while (currentLine != "*/") {
+            if(currentLine.Contains("/*")){
+                while (currentLine != "*/") {
+                    currentLine = schemaReader.ReadLine();
+                }
                 currentLine = schemaReader.ReadLine();
             }
-            currentLine = schemaReader.ReadLine();
 
             //start reading schema
             while (currentLine != null) {

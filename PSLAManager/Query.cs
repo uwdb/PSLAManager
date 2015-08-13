@@ -133,13 +133,13 @@ namespace PSLAManager
                     String[] splitValue = querySelectionAttributeValue.Split(',');
                     for (int i = 0; i < splitSelection.Count(); i++)
                     {
-                        whereSelectionString = String.Format("{0} <= {1}", splitSelection[i], splitValue[i]);
+                        whereSelectionString += String.Format("{0} <= {1}", splitSelection[i], splitValue[i]);
                         if (i != splitSelection.Count() - 1) whereSelectionString += " AND ";
                     }
                 }
                 else
                 {
-                    whereSelectionString = String.Format("{0} <= {1}", 
+                    whereSelectionString += String.Format("{0} <= {1}",
                                                             querySelectionAttribute.attributeName,
                                                             querySelectionAttributeValue);
                 }
